@@ -1,5 +1,5 @@
 import express from "express";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import { exit } from "process";
 import dotenv from "dotenv";
 
@@ -72,20 +72,25 @@ async function main() {
       res.render("index", locals);
     });
 
-    // TODO: add endpoint for editing quote
+    // DONE: add endpoint for editing quote
     app.put("/quotes/:id", async function (req, res) {
       // DONE: get the id of the request
       const id = req.params.id;
 
-      // get the name and quote from request
+      // DONE: get the name and quote from request
       console.log(req.body);
-      // find old quote doc from collection
+      const name = req.body.name;
+      const quote = req.body.quote;
+      // const {name, quote} = req.body;
+      
+      // TODO: validate user input
 
-      // replace doc values
+      // DONE: find old quote doc from collection
+      const result = await quotesCollection.replaceOne({_id: ObjectId(id)}, {name, quote});
+      console.log("This is result", result);
 
-      // save doc
-
-      // redirect user
+      // DONE: redirect user
+      res.redirect("/");
     })
 
     // Endpoint for /quotes using POST method
@@ -115,6 +120,8 @@ async function main() {
         res.redirect("/");
       }
     });
+
+    // TODO: Endpoint for /quotes/:id DELETE method
   
     app.listen(3000, function () {
       console.log("Listening on 3000");

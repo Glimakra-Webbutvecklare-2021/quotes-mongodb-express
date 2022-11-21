@@ -74,11 +74,16 @@
           fetch(`/quotes/${id}`, {
             method: "PUT",
             headers: {
-                'Content-Type': 'application/json' // let server know that body is a string of json
+              "Content-Type": "application/json", // let server know that body is a string of json
             },
             body: JSON.stringify({ name: newName, quote: newQuote }),
           })
-            .then((resp) => console.log(resp))
+            .then((resp) => {
+              console.log(resp);
+              if (resp.redirected) {
+                window.location.href = resp.url;
+              }
+            })
             .catch((err) => console.error(err));
         };
       }
