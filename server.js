@@ -85,7 +85,7 @@ async function main() {
       
       // TODO: validate user input
 
-      // DONE: find old quote doc from collection
+      // DONE: find old quote and replace doc from collection
       const result = await quotesCollection.replaceOne({_id: ObjectId(id)}, {name, quote});
       console.log("This is result", result);
 
@@ -122,7 +122,18 @@ async function main() {
     });
 
     // TODO: Endpoint for /quotes/:id DELETE method
-  
+    app.delete("/quotes/:id", async function (req, res) {
+      const id = req.params.id;
+      // const { id } = req.params;
+
+      console.log("request for deletion of id", id);
+      const result = await quotesCollection.deleteOne({_id: ObjectId(id)})
+
+      console.log("result of deletion", result);
+
+      res.redirect("/");
+    })
+
     app.listen(3000, function () {
       console.log("Listening on 3000");
     });
