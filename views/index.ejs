@@ -3,9 +3,26 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.min.css">
     <title>Hello world</title>
+    <style>
+      .success {
+        color: green;
+      }
+
+      .fail {
+        color: orange;
+      }
+
+    </style>
   </head>
   <body>
+    <main>
+    <div>
+      <% if (serverMessage) { %>
+        <span class="<%= serverMessage.type %>"><%= serverMessage.message %></span>
+      <% } %> 
+    </div>
     <h1>Hello world</h1>
     <p>
       Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fugiat tempora
@@ -42,7 +59,7 @@
       <input type="text" placeholder="quote" name="quote" />
       <button type="submit">Save Change</button>
     </form>
-
+  </main>
     <script>
       // fetch("/quotes").then(resp => resp.json()).then(quotes => renderQuotes(quotes));
       function handleDelete(id) {
