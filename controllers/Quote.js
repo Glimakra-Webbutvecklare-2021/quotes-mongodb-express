@@ -1,47 +1,55 @@
 import dbConnect from "../mongoDbClient.js";
 import { ObjectId } from "mongodb";
 
-const client = await dbConnect();
-const db = client.db("quotes-cluster");
-const quotesCollection = db.collection("quotes");
+import QuoteModel from "../models/Quote.js";
+
+// const client = await dbConnect();
+// const db = client.db("quotes-cluster");
+// const quotesCollection = db.collection("quotes");
 
 async function getAllQuotes(req, res) {
   // DONE: Get quotes from MongoDB Atlas.
-  const quotes = await quotesCollection.find().toArray();
+  const quotes = await QuoteModel.find();
   const locals = { quotes };
   res.render("index", locals);
 }
 
 async function updateQuote(req, res) {
-  // DONE: get the id of the request
+  try {
   const id = req.params.id;
 
   const name = req.body.name;
   const quote = req.body.quote;
+  const validationObj = await QuoteModel.validate({name, quote});
+  if (validationObj) {
+    throw validationObj;
+  }
 
-  // TODO: validate user input
-
-  // DONE: find old quote and replace doc from collection
-  const result = await quotesCollection.replaceOne(
+  await QuoteModel.updateOne(
     { _id: ObjectId(id) },
     { name, quote }
   );
+  } catch (err) {
+    console.log(err.message);
+  } finally {
+    res.redirect("/");
+  }
 
-  res.redirect("/");
 }
 
 async function addQuote(req, res) {
   try {
-    if (!req.body.quote) {
-      throw "Please set a quote before submitting";
+    const {name, quote} = req.body;
+    const quoteDoc = new QuoteModel({name, quote});
+
+    const validationObj = await quoteDoc.validate();
+    if (validationObj) {
+      throw validationObj;
     }
 
-    // TODO: set more checks to remove invalid data insertions
-
-    const result = await quotesCollection.insertOne(req.body);
-    console.log(result);
+    quoteDoc.save();
   } catch (err) {
-    console.error(err);
+    console.error(err.message);
   } finally {
     res.redirect("/");
   }
@@ -49,13 +57,9 @@ async function addQuote(req, res) {
 
 async function deleteQuote(req, res) {
   const id = req.params.id;
-  // const { id } = req.params;
 
-  console.log("request for deletion of id", id);
-  const result = await quotesCollection.deleteOne({ _id: ObjectId(id) });
-
-  console.log("result of deletion", result);
-
+  const result = await QuoteModel.deleteOne({ _id: ObjectId(id) });
+  console.log(result);
   res.redirect("/");
 }
 
