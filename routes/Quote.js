@@ -1,12 +1,13 @@
 import { Router } from "express";
 import QuoteController from "../controllers/Quote.js";
+import {ensureAuth} from "../middleware/Auth.js";
 
 const QuoteRouter = Router();
 
-QuoteRouter.get("/", QuoteController.getAllQuotes);
-QuoteRouter.put("/quotes/:id", QuoteController.updateQuote);
-QuoteRouter.post("/quotes", QuoteController.addQuote);
-QuoteRouter.delete("/quotes/:id", QuoteController.deleteQuote);
+QuoteRouter.get("/quotes", ensureAuth, QuoteController.getAllQuotes);
+QuoteRouter.put("/quotes/:id", ensureAuth, QuoteController.updateQuote);
+QuoteRouter.post("/quotes", ensureAuth, QuoteController.addQuote);
+QuoteRouter.delete("/quotes/:id", ensureAuth, QuoteController.deleteQuote);
 
 
 export default QuoteRouter;

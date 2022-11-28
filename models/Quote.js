@@ -25,6 +25,12 @@ const quoteSchema = {
     type: String,
     required: "must be filled in",
   },
+  visibility: {
+    type: String,
+    enum: ["public", "private"],
+    default: "public"
+  },
+  postedBy: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
 };
 
 const QuoteModel = mongoose.model("Quote", quoteSchema);
