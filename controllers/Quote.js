@@ -2,19 +2,19 @@ import QuoteModel from "../models/Quote.js";
 // import qs from "querystring";
 import { ObjectId } from "mongodb";
 
-// const client = await dbConnect();
-// const db = client.db("quotes-cluster");
-// const quotesCollection = db.collection("quotes");
-
 async function getAllQuotes(req, res) {
-  // DONE: Get quotes from MongoDB Atlas.
-  // const quotes = await quotesCollection.find().toArray();
-  const quotes = await QuoteModel.find();
+  // get all public quotes
+  // make sure that postedBy gets populated with the user
+  const publicQuotes = await QuoteModel.find({visibility: 'public'}).populate("postedBy", "username").exec(); // I want user.username to populate postedBy 
 
-  // console.log(req.query);
+  // get all quotes posted by logged in user
+  // session should have userId
+  // because it is added in AuthController.login
+  const {userId} = req.session 
+  const userQuotes = await QuoteModel.find( {postedBy: ObjectId(userId)});
 
-  const locals = { quotes, serverMessage: req.query };
-  res.render("index", locals);
+  const locals = { publicQuotes, userQuotes, serverMessage: req.query };
+  res.render("quotes", locals);
 }
 
 async function updateQuote(req, res) {
@@ -22,22 +22,22 @@ async function updateQuote(req, res) {
     // get the id of the request
     const id = req.params.id;
 
-    const { name, quote}  = req.body;
+    const { name, quote, visibility}  = req.body;
     
-    // validate user input
-    const quoteDoc = new QuoteModel({ name, quote});
-    await quoteDoc.validate()
-
     // find old quote and replace doc from collection
+    // validation happens as we update
     await QuoteModel.updateOne(
       { _id: ObjectId(id) },
-      { name, quote }
+      { name, quote, visibility }
     );
 
   } catch(err) {
     console.error(err.message);
+    const q = new URLSearchParams({type: "success", message: err.message});
+    return res.redirect(`/quotes?${q}`);
   } finally {
-    res.redirect("/");
+    const q = new URLSearchParams({type: "success", message: "Successfully updated quote!"});
+    res.redirect(`/quotes?${q}`);
   }
 }
 
@@ -46,14 +46,13 @@ async function addQuote(req, res) {
 
   try {
     // collect data from body
-    const {name, quote} = req.body;
+    const {name, quote, visibility} = req.body;
+
+    const postedBy = ObjectId(req.session.userId);
 
     // create Quote document instance locally
-    const quoteDoc = new QuoteModel({name , quote})
+    const quoteDoc = new QuoteModel({name , quote, visibility, postedBy})
     
-    // validation
-    await quoteDoc.validate();
-
     // save to database
     quoteDoc.save();
 
@@ -65,7 +64,7 @@ async function addQuote(req, res) {
     console.error(err.message);
   } finally {
     const queryStr = query.toString();
-    res.redirect(`/?${queryStr}`);
+    res.redirect(`/quotes?${queryStr}`);
   }
 }
 

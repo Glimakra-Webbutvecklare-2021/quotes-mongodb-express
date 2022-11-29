@@ -1,0 +1,151 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.min.css">
+    <title>Hello world</title>
+    <style>
+      .success {
+        color: green;
+      }
+
+      .fail {
+        color: orange;
+      }
+
+    </style>
+  </head>
+  <body>
+    <main>
+    <div>
+      <% if (serverMessage) { %>
+        <span class="<%= serverMessage.type %>"><%= serverMessage.message %></span>
+      <% } %> 
+    </div>
+
+   
+
+    <h2>Public Quotes</h2>
+    <ul>
+      <% for(let i = 0; i < publicQuotes.length; i++) { %>
+      <li>
+        <span><%= publicQuotes[i].name %></span>
+        <b><%= publicQuotes[i].quote %></b>
+        <small>, posted by <%= publicQuotes[i]?.postedBy?.username || "Unknown" %></small>
+      </li>
+      <% } %>
+    </ul>
+
+    <h2>Your Quotes</h2>
+    <ul>
+      <% for(let i = 0; i < userQuotes.length; i++) { %>
+      <li>
+        <span><%= userQuotes[i].name %></span>
+        <b><%= userQuotes[i].quote %></b>
+        <small>, posted by you </small>
+        <span>Visibility: <%= userQuotes[i].visibility %></span>
+        <button
+          onclick="handleEdit('<%= userQuotes[i]._id %>', '<%= userQuotes[i].name %>', '<%= userQuotes[i].quote %>', '<%= userQuotes[i].visibility %>')"
+        >
+          edit
+        </button>
+        <button onclick="handleDelete('<%= userQuotes[i]._id %>')">delete</button>
+      </li>
+      <% } %>
+    </ul>
+
+
+    <form action="/quotes" method="POST">
+      <h2>Add new quote</h2>
+      <input type="text" placeholder="name" name="name" />
+      <input type="text" placeholder="quote" name="quote" />
+      <fieldset>
+        <label for="public">Public</label>
+        <input type="radio" name="visibility" id="public" value="public"/>
+        <label for="private">Private</label>
+        <input type="radio" name="visibility" id="private" value="private"/>
+      </fieldset>
+      <button type="submit">Submit</button>
+    </form>
+
+    <!-- Should appear after a quotes wants to be edited -->
+    <form id="editForm" hidden>
+      <h2>Edit quote</h2>
+      <input type="text" placeholder="name" name="name" />
+      <input type="text" placeholder="quote" name="quote" />
+      <fieldset>
+        <label for="public">Public</label>
+        <input type="radio" name="visibility" id="public" value="public"/>
+        <label for="private">Private</label>
+        <input type="radio" name="visibility" id="private" value="private"/>
+      </fieldset>
+
+      <button type="submit">Save Change</button>
+    </form>
+  </main>
+    <script>
+      // fetch("/quotes").then(resp => resp.json()).then(quotes => renderQuotes(quotes));
+      function handleDelete(id) {
+        console.log("Delete was triggered with id", id);
+
+        fetch(`/quotes/${id}`, { method: "DELETE" })
+          .then((resp) => {
+            console.log(resp);
+            if (resp.redirected) {
+              window.location.href = resp.url;
+            }
+          })
+          .catch((err) => console.log(err));
+      }
+
+      function handleEdit(id, oldName, oldQuote, oldVisibility) {
+        // access each input and repopulate them
+        const editFormEl = document.getElementById("editForm");
+        console.log("handleEdit - Form Elements", editFormEl.elements);
+
+        // name
+        editFormEl.elements.name.value = oldName;
+
+        // quote
+        editFormEl.elements.quote.value = oldQuote;
+
+        // visibilty
+        editFormEl.elements.visibility.value = oldVisibility;
+
+        // Show edit form
+        document.getElementById("editForm").hidden = false;
+
+        // Setup submit handler for edit form
+        editFormEl.onsubmit = (evt) => {
+          evt.preventDefault();
+          // DONE send a put request to server
+          // with new values for name and quote
+          // with current selected id
+
+          const newName = editFormEl.elements.name.value;
+
+          const newQuote = editFormEl.elements.quote.value;
+
+          const newVisibility = editFormEl.elements.visibility.value;
+
+          // tip: use fetch
+          fetch(`/quotes/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json", // let server know that body is a string of json
+            },
+            body: JSON.stringify({ name: newName, quote: newQuote, visibility: newVisibility }),
+          })
+            .then((resp) => {
+              console.log(resp);
+              if (resp.redirected) {
+                window.location.href = resp.url;
+              }
+            })
+            .catch((err) => console.error(err));
+        };
+      }
+    </script>
+  </body>
+</html>

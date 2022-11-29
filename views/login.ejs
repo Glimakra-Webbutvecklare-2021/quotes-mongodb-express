@@ -1,0 +1,45 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.min.css"
+    />
+    <title>Login</title>
+    <style>
+      .success {
+        color: green;
+      }
+
+      .fail {
+        color: orange;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div>
+        <% if (serverMessage) { %>
+        <span class="<%= serverMessage.type %>"
+          ><%= serverMessage.message %></span
+        >
+        <% } %>
+      </div>
+      <h1>Login</h1>
+      <p>
+        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fugiat tempora
+        voluptate id qui. Expedita suscipit, perferendis illum quos inventore
+        esse a! Cupiditate autem perferendis neque sint fugit est molestiae
+        tempora.
+      </p>
+
+      <form action="/login" method="POST">
+        <input type="text" placeholder="username" name="username" />
+        <input type="text" placeholder="password" name="password" />
+        <button type="submit">Login</button>
+      </form>
+    </main>
+  </body>
+</html>
